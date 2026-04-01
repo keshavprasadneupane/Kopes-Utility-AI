@@ -3,12 +3,17 @@ using System.Collections.Generic;
 
 namespace ThirdParty.PriorityQueeu {
 
-	// this is modified version of .net priority queue implementation
-	// original source: "https://github.com/dotnet/runtime/blob/main/src/libraries/System.Collections/src/System/Collections/Generic/PriorityQueue.cs"
-	// just simplified to be Unity compatible and quaternary heap for better performance in pathfinding scenarios
-	// also added indexed mode for O(log n) priority updates
-	// license: MIT License
-	// original license: MIT License
+	// Copyright (c) .NET Foundation and Contributors. All rights reserved.
+	// Licensed under the MIT License.
+	// Original source: https://github.com/dotnet/runtime/blob/main/src/libraries/System.Collections/src/System/Collections/Generic/PriorityQueue.cs
+	//
+	// Modifications by Keshav Prasad Neupane (Kope), 2024
+	// - Simplified for Unity compatibility
+	// - Converted to quaternary heap (4-ary) for pathfinding performance
+	// - Added IHasCost<T> interface for self-reporting priority
+	// - Added indexed mode (Dictionary-backed) for O(log n) updates
+	// - Added TryRemove support
+	// Licensed under the MIT License.
 
 
 	/// <summary>
