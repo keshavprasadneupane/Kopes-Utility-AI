@@ -34,7 +34,12 @@ namespace Kope.Component.Health {
 		public float MaxHealth => this.maxHealth;
 
 		public event Action<float> OnMaxHealthChanged;
+
+		// In your code Implementation, you can invoke this event whenever the maxHealth value changes to 
+		// notify any listeners about the update. but for this example this is unused.
 		public event Action<float> OnCurrentHealthChanged;
+
+
 
 		protected override bool OnInit() {
 			this.currentHealth = this.maxHealth;

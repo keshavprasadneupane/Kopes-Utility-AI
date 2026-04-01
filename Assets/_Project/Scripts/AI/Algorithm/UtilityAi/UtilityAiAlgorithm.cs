@@ -24,7 +24,7 @@ namespace Kope.AI.Utility {
 	/// </summary>
 	public class UtilityAiAlgorithm : AIBrainAlgorithm {
 		private const float DEFAULT_INITIAL_WEIGHT = 1f;
-		private const float DEFAULT_FIXED_DELTA = 0.016f;
+
 		[Header("Default Actions")]
 		[SerializeField] private ActionSO idleAction;
 
@@ -41,6 +41,9 @@ namespace Kope.AI.Utility {
 
 		[SerializeField, Range(0.05f, 1.0f), Tooltip("The minimum weight an action can decay to.")]
 		private float minActionWeight = 0.1f;
+
+		[SerializeField, Range(1.0f, 10.0f), Tooltip("Multiplier for time elapsed to control the speed of weight regeneration using compound interest formula.")]
+		private float timeElapsedMult = 2.0f;
 
 		#region Internal Classes
 		protected internal class ActionEntry : IHasCost<float> {
@@ -80,10 +83,10 @@ namespace Kope.AI.Utility {
 
 			public void ResetWeight(float weight) => this.biasWeight = weight;
 
-			public void RegenWeights(int numberOfTicks) {
-				if (this.isActive || numberOfTicks <= 0) return;
+			public void RegenWeights(float interval) {
+				if (this.isActive || interval <= 0) return;
 				// Compound interest recovery
-				float compoundedRegenAmount = this.biasWeight * (Mathf.Pow(1 + this.action.WeightRegenRate, numberOfTicks) - 1);
+				float compoundedRegenAmount = this.biasWeight * (Mathf.Pow(1.0f + this.action.WeightRegenRate, interval) - 1.0f);
 				this.biasWeight = Mathf.Min(1f, this.biasWeight + compoundedRegenAmount);
 			}
 
@@ -99,6 +102,7 @@ namespace Kope.AI.Utility {
 			public int Count => this.actionQueue.Count;
 
 			public Memory(int capacity) {
+
 				this.actionQueue = new PriorityQueueSimple<ActionEntry, float>(capacity);
 				this.memoryCapacity = capacity;
 			}
@@ -127,15 +131,17 @@ namespace Kope.AI.Utility {
 				this.actionQueue.TryUpdatePriority(entry);
 			}
 
-			public void RegenWeights(ActionEntry except, float lastTime, float currentTime, float deltaTime) {
-				float safeDelta = deltaTime > 0 ? deltaTime : DEFAULT_FIXED_DELTA;
-				int ticks = Mathf.RoundToInt((currentTime - lastTime) / safeDelta);
-				if (ticks <= 0) return;
+			public void RegenWeights(ActionEntry except, float lastTime, float currentTime, float timeElapsedMult) {
+				// elapsed time is in seconds, so we can use it directly with the compound interest formula in ActionEntry.RegenWeights.
+				// and using pow function will not be expensive since elapsed time is small and
+				// we are not doing it every frame, but only when the AI needs to make a decision.
+				float elapsed = (currentTime - lastTime) * timeElapsedMult;
+				if (elapsed <= 0) return;
 
 				var entries = this.actionQueue.GetElements();
 				foreach (var entry in entries) {
 					if (entry == except) continue;
-					entry.RegenWeights(ticks);
+					entry.RegenWeights(elapsed);
 					this.actionQueue.TryUpdatePriority(entry);
 				}
 			}
@@ -167,11 +173,10 @@ namespace Kope.AI.Utility {
 					this.actionEntries.Add(new ActionEntry(Instantiate(action), DEFAULT_INITIAL_WEIGHT));
 				}
 			}
-
+			// Ensure short-term memory size is at least 1 and less than the total number of actions to allow for meaningful memory management.
+			// so this ensure the action is from 1 to n-1, where n is the total number of actions including idle.
 			int size = Mathf.Clamp(this.shortTermMemorySize, 1, Mathf.Max(1, this.actionEntries.Count - 1));
-			//Debug.Log($"MemorySize = {size}");
 			this.memory = new Memory(size);
-			//			Debug.Log("Utility IAI Algorithm initialized with " + this.actionEntries.Count + " actions, including idle.");
 			return true;
 		}
 
@@ -190,11 +195,12 @@ namespace Kope.AI.Utility {
 		private ActionSO SelectBestAction(IReadOnlyContext ctx) {
 			// Optimization: If there's only one action (the idle action),
 			// skip evaluation and return it immediately.
-			if (this.actionEntries.Count == 1) return this.idleActionEntry.Action;
+			const int IDLE_ONLY_COUNT = 1;
+			if (this.actionEntries.Count == IDLE_ONLY_COUNT) return this.idleActionEntry.Action;
 
 			// Regenerate weights for all non-active actions based on the time elapsed since the last evaluation.
 			// using Compound interest formula for more dynamic recovery: newWeight = currentWeight + (currentWeight * (regenRate * ticks))
-			this.memory.RegenWeights(this.currentlyActiveEntry, this.lastEvaluationTime, Time.time, Time.deltaTime);
+			this.memory.RegenWeights(this.currentlyActiveEntry, this.lastEvaluationTime, Time.time, this.timeElapsedMult);
 
 			var best = EvaluateActions(ctx);
 			return RunMemoryTask(best);
