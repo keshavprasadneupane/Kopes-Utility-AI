@@ -102,7 +102,6 @@ namespace Kope.AI.Utility {
 			public int Count => this.actionQueue.Count;
 
 			public Memory(int capacity) {
-
 				this.actionQueue = new PriorityQueueSimple<ActionEntry, float>(capacity);
 				this.memoryCapacity = capacity;
 			}
@@ -128,6 +127,9 @@ namespace Kope.AI.Utility {
 			public void DecayWeight(ActionEntry entry, float minWeight) {
 				if (!Contains(entry)) return;
 				entry.ApplyDecay(minWeight);
+			}
+			public void UpdatePriority(ActionEntry entry) {
+				if (!Contains(entry)) return;
 				this.actionQueue.TryUpdatePriority(entry);
 			}
 
@@ -241,12 +243,17 @@ namespace Kope.AI.Utility {
 					// but we get to reset the weight of the rescued action.
 				}
 			} else if (this.memory.Contains(actionEntry)) {
-				this.memory.DecayWeight(actionEntry, this.minActionWeight); // Sync decay changes
+				this.memory.DecayWeight(actionEntry, this.minActionWeight); // apply decay
+				this.memory.UpdatePriority(actionEntry); // sync
 			} else {
 				var removed = this.memory.Enqueue(actionEntry);
+				// no need to update priority for removed there, since they 
+				// are not in memory
 				removed?.ResetWeight(DEFAULT_INITIAL_WEIGHT);
 				actionEntry.ResetWeight(DEFAULT_INITIAL_WEIGHT); ;
-				this.memory.DecayWeight(actionEntry, this.minActionWeight); // Sync initial decay
+				//Apply Decay and update 
+				this.memory.DecayWeight(actionEntry, this.minActionWeight);
+				this.memory.UpdatePriority(actionEntry);
 			}
 
 			this.lastEvaluationTime = Time.time;
