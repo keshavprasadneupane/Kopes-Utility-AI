@@ -86,8 +86,15 @@ namespace Kope.AI.Utility {
 			public void RegenWeights(float interval) {
 				if (this.isActive || interval <= 0) return;
 				// Compound interest recovery
-				float compoundedRegenAmount = this.biasWeight * (Mathf.Pow(1.0f + this.action.WeightRegenRate, interval) - 1.0f);
-				this.biasWeight = Mathf.Min(1f, this.biasWeight + compoundedRegenAmount);
+				// float compoundedRegenAmount = this.biasWeight * (Mathf.Pow(1.0f + this.action.WeightRegenRate, interval) - 1.0f);
+				// this.biasWeight = Mathf.Min(1f, this.biasWeight + compoundedRegenAmount);
+				// below is the optimized version of the above formula, which is mathematically equivalent but with fewer operations.
+				// derivation: let r = this.action.WeightRegenRate, w = this.biasWeight, t = interval
+				// b1 =b0 + b0 * ((1 + r)^t -1) , opening the bracket
+				//    =b0 + b0 * (1 + r)^t - b0 , the b0 and -b0 cancel out
+				//    = b0 * (1 + r)^t, now this formula is always greater than 0,so no need to use max function 
+				// to clamp the minimum value, and we can directly use min function to clamp the maximum value.
+				this.biasWeight = Mathf.Min(1f, this.biasWeight * Mathf.Pow(1.0f + this.action.WeightRegenRate, interval));
 			}
 
 			public void SetIsActive(bool isActive) {
