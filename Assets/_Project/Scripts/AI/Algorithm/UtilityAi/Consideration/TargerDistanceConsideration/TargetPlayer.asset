@@ -12,12 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 97be6016f548f4b0c810bf3d0f05c004, type: 3}
   m_Name: TargetPlayer
   m_EditorClassIdentifier: Assembly-CSharp::RangeConsideration
-  relevantActionType: 42
+  relevantActionTypes: 00000000
   considerationName: Range Consideration
   entityCommonNameConfig: {fileID: 11400000, guid: 296b484721bdc20d2b51d78c4a7374ac, type: 2}
   entityCommonName: Player
   maxRange: 10
-  angleThreshold: 180
+  angleThreshold: 130
+  deadZoneRadius: 1
   rangeCurve:
     serializedVersion: 2
     m_Curve:

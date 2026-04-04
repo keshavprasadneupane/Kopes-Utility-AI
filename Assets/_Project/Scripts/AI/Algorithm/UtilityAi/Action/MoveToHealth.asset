@@ -22,4 +22,4 @@ MonoBehaviour:
   momentumBias: 0.05
   deadZone: 0.2
   maxActionDuration: 4
-  directionChangeFrequency: 3
+  directionChangeFrequency: 10
