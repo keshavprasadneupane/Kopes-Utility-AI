@@ -23,6 +23,8 @@ namespace Kope.Core.Sensor {
 
 		private float _actualDetectionRadius;
 		protected string _parentGOHiearchPathMessage;
+
+		public float DetectionRadius => this.detectionRadius;
 		/// <summary>	
 		///  Call this on either Awake or Start or 
 		/// any initialization point before the sensor starts detecting. 

@@ -30,7 +30,7 @@ namespace Kope.AI {
 
 		#region Unity Callbacks
 #if UNITY_EDITOR
-		protected void OnValidate() => ResetState();
+		protected virtual void OnValidate() => ResetState();
 #endif
 		void OnEnable() => ResetState();
 

@@ -48,6 +48,7 @@ namespace Kope.Component.Movement {
 		public const float MOVEMENT_EPSILON = 0.1f;
 
 		protected MovementIntent _currentIntent;
+		public Dimension Dimension => this.dimension;
 		public float Mass => this.rb.mass;
 		public Vector3 Direction => this._currentIntent.Direction;
 		public Vector3 Position => this.rb.position;

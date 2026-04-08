@@ -5,6 +5,7 @@ using UnityEngine;
 using Kope.AI.Utility;
 using Kope.Core.EntityComponentSystem;
 using Kope.Component.Movement;
+using Kope.Component;
 
 
 [CreateAssetMenu(fileName = "TargetDistanceConsideration", menuName = "Scriptable Objects/AI/Utility/Considerations/TargetDistanceConsideration")]
@@ -16,11 +17,6 @@ public class TargetDistanceConsideration : ConsiderationSO {
 	[SerializeField, Tooltip("The common name of the entity to consider. " +
 	"This should be defined in the EntityCommonNameConfig.")]
 	private string entityCommonName = "Player";
-	// 0.0001 to avoid divide by zero
-	[SerializeField, Range(0.0001f, 100f), Tooltip("The maximum range within which to consider targets.")]
-	private float maxRange = 10f;
-	[SerializeField, Range(0, 360), Tooltip("The angle threshold for considering targets.")]
-	private float angleThreshold = 180f;
 
 	[SerializeField, Range(0.001f, 10f), Tooltip("The radius of the dead zone around the entity. " +
 	"Targets within this radius will not be considered.")]
@@ -28,9 +24,6 @@ public class TargetDistanceConsideration : ConsiderationSO {
 	[SerializeField] private AnimationCurve rangeCurve = AnimationCurve.EaseInOut(0f, 1f, 1f, 0f);
 
 	private HashedTag _hashedEntityCommonName;
-	private float _cosineOfAngleThreshold;
-	private float _squareCosineOfAngleThreshold;
-	private float _squareMaxRange;
 	private float _squareDeadZoneRadius;
 	private IReadOnlyComponentRegistry _closestTargetCache;
 	public override string ConsiderationName => this.considerationName;
@@ -46,18 +39,8 @@ public class TargetDistanceConsideration : ConsiderationSO {
 
 
 	protected override void OnInitialize() {
-
-		if (this.deadZoneRadius >= this.maxRange) {
-			Debug.LogWarning($"[{this.considerationName}] deadZoneRadius is >= maxRange. Adjusting to avoid logic errors.");
-			this.maxRange = this.deadZoneRadius + 0.1f;
-		}
-		this._squareMaxRange = this.maxRange * this.maxRange;
 		this._squareDeadZoneRadius = this.deadZoneRadius * this.deadZoneRadius;
 		this._hashedEntityCommonName = new HashedTag(this.entityCommonName);
-		// Pre-calculate the cosine of the threshold once
-		// Dividing angle by 2 because threshold usually represents total FOV width
-		this._cosineOfAngleThreshold = Mathf.Cos(this.angleThreshold * 0.5f * Mathf.Deg2Rad);
-		this._squareCosineOfAngleThreshold = this._cosineOfAngleThreshold * this._cosineOfAngleThreshold;
 		ValidateConfig(this._hashedEntityCommonName);
 		this._closestTargetCache = null; // Clear cache on init/validate to ensure fresh evaluation
 	}
@@ -82,8 +65,10 @@ public class TargetDistanceConsideration : ConsiderationSO {
 		this._closestTargetCache = null;
 		if (this.entityCommonNameConfig == null) return (0f, 0); // no config, no targets, no score
 
-		var closest = FindClosestValidTarget(context, out float actualDistance);
+		var fovData = context.FieldOfViewData;
+		var closest = FindClosestValidTarget(context, fovData, out float actualDistance);
 		this._closestTargetCache = closest;
+		float maxRange = fovData.ViewDistance;
 
 		if (closest == null) {
 			return (0f, 0); // no valid target found, so score is 0. Multiplication count is not incremented since this consideration doesn't contribute to the score.
@@ -92,7 +77,7 @@ public class TargetDistanceConsideration : ConsiderationSO {
 		// enforce a minimum value for both in the inspector, but we will still do 
 		// this check to be safe and avoid any potential divide by zero errors if 
 		// the values are set to something unexpected through code or future changes.
-		float denominator = Mathf.Max(Mathf.Epsilon, this.maxRange - this.deadZoneRadius);
+		float denominator = Mathf.Max(Mathf.Epsilon, maxRange - this.deadZoneRadius);
 		float normalizedDistance = Mathf.Clamp01((actualDistance - this.deadZoneRadius) / denominator);
 		float score = Mathf.Max(this.rangeCurve.Evaluate(normalizedDistance), 0.0f);
 
@@ -107,7 +92,7 @@ public class TargetDistanceConsideration : ConsiderationSO {
 		return (score, 0);
 	}
 
-	private IReadOnlyComponentRegistry FindClosestValidTarget(IReadOnlyContext context, out float finalDistance) {
+	private IReadOnlyComponentRegistry FindClosestValidTarget(IReadOnlyContext context, FieldOfViewData fovData, out float finalDistance) {
 		finalDistance = 0f;
 		if (!context.TryGetReadOnlyTargetContexts(this._hashedEntityCommonName, out var targetContexts)) {
 			return null;
@@ -117,12 +102,12 @@ public class TargetDistanceConsideration : ConsiderationSO {
 			Debug.LogError($"[{this.considerationName}] The entity does not have a MovementComponentBase. Please ensure it is added to the entity.", this);
 			return null;
 		}
+
 		Vector3 selfPos = movementComponent.Position;
 		Vector3 forward = movementComponent.GetLookingAtDirection().normalized;
 		//	Debug.Log($"[RangeConsideration] Self Position: {selfPos}, Forward Direction: {forward}");
-
 		IReadOnlyComponentRegistry closest = null;
-		float closestSqrDist = this._squareMaxRange;
+		float closestSqrDist = fovData.SquareViewDistance;
 
 		foreach (var target in targetContexts) {
 			Vector3 targetPos = target.EntityTransform.position;
@@ -136,7 +121,7 @@ public class TargetDistanceConsideration : ConsiderationSO {
 
 			// 2. If an angle threshold is set, check if the target is within the angle threshold 
 			// relative to the entity's forward direction.
-			if (this.angleThreshold < 360f) {
+			if (fovData.FieldOfViewAngle < 360f) {
 				float dot = Vector3.Dot(forward, direction);
 
 				/* PERFORMANCE OPTIMIZATION: High-speed Field of View (FOV) Check.
@@ -160,11 +145,11 @@ public class TargetDistanceConsideration : ConsiderationSO {
 				// Safety: If the FOV is <= 180 degrees (cosThreshold >= 0), any negative dot 
 				// product is automatically outside the threshold. This check also prevents 
 				// squared negative dots from erroneously passing as positive matches behind the entity.
-				if (this._cosineOfAngleThreshold >= 0 && dot < 0) continue;
+				if (fovData.CosineOfAngleThreshold >= 0 && dot < 0) continue;
 
 				// Final comparison using pre-squared threshold and sqrMagnitude. 
 				// This is mathematically equivalent to the angular check but requires zero Sqrt/Acos calls.
-				if (dot * dot < this._squareCosineOfAngleThreshold * sqrDist) continue;
+				if (dot * dot < fovData.SquareCosineOfAngleThreshold * sqrDist) continue;
 			}
 			closestSqrDist = sqrDist;
 			closest = target;

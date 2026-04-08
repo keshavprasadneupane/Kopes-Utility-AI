@@ -69,7 +69,7 @@ public class EntityManager : InitializableBase, IEntityDiedOrPooled {
 
 
 	protected override bool OnInit() {
-		Debug.Log($"Initing EntityManager for {this.commonEntityName} " + gameObject.name);
+		//		Debug.Log($"Initing EntityManager for {this.commonEntityName} " + gameObject.name);
 		if (!Validate()) return false;
 		// After validation, we can be sure that the EntityComponentStore and its ComponentRegistry are properly initialized and ready to use.
 

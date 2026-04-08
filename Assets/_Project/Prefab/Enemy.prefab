@@ -285,6 +285,54 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!1 &2073633992190689905
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2176924127688309645}
+  - component: {fileID: 5345775419679060660}
+  m_Layer: 6
+  m_Name: FOV
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2176924127688309645
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2073633992190689905}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1935474814959644263}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5345775419679060660
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2073633992190689905}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec1f8ce59dd3e9a119502f784806d9df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FOVGizmo
+  sensor: {fileID: 3046832750865849840}
+  outerLineColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  innerLineColor: {r: 1, g: 0, b: 0, a: 1}
+  mover: {fileID: 1843184936454226081}
 --- !u!1 &2538957034957165861
 GameObject:
   m_ObjectHideFlags: 0
@@ -647,11 +695,10 @@ MonoBehaviour:
   useConfig: 1
   algorithmName: Utility AI
   actionSOs:
-  - {fileID: 11400000, guid: 55f0fced5ba3438c0ab41b97654eae60, type: 2}
   - {fileID: 11400000, guid: 7166fdc7671e454d280b9f1362b63ba1, type: 2}
-  - {fileID: 11400000, guid: 7c787eb33a405e4a985289541d12a8e5, type: 2}
   shortTermMemorySize: 5
   minActionWeight: 0.1
+  timeElapsedMult: 2
 --- !u!1 &4145335786531594061
 GameObject:
   m_ObjectHideFlags: 0
@@ -682,7 +729,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 2176924127688309645}
   m_Father: {fileID: 8166732118455606292}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!58 &7151205481372881127
@@ -742,6 +790,7 @@ MonoBehaviour:
   usesExitDetection: 0
   visualizeGizmos: 1
   gizmoColor: {r: 0, g: 1, b: 1, a: 1}
+  fieldOfViewAngle: 90
 --- !u!1 &5499836826176090429
 GameObject:
   m_ObjectHideFlags: 0
@@ -1033,7 +1082,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5620013856236012600}
-  - component: {fileID: 8943319921173141038}
   - component: {fileID: 1843184936454226081}
   m_Layer: 6
   m_Name: Movement
@@ -1057,21 +1105,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6337193638724747123}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8943319921173141038
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7704947831998131147}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec1f8ce59dd3e9a119502f784806d9df, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LookingDirection
-  movementComponent: {fileID: 1843184936454226081}
-  gizmoLineLength: 5
-  gizmoColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!114 &1843184936454226081
 MonoBehaviour:
   m_ObjectHideFlags: 0

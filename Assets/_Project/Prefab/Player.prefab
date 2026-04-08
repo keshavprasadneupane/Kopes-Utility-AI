@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7422053729322131913}
-  m_Layer: 5
+  m_Layer: 6
   m_Name: Fill Area
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -48,7 +48,7 @@ GameObject:
   - component: {fileID: 1185100649618282388}
   - component: {fileID: 6220842306422569990}
   - component: {fileID: 4931259409791048928}
-  m_Layer: 5
+  m_Layer: 6
   m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -147,7 +147,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8268804125612197792}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Component
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -182,7 +182,7 @@ GameObject:
   - component: {fileID: 2852355591342128100}
   - component: {fileID: 1643903968277621941}
   - component: {fileID: 91849087301607253}
-  m_Layer: 5
+  m_Layer: 6
   m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -256,7 +256,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2367451668998597272}
   - component: {fileID: 3813612911708907349}
-  m_Layer: 5
+  m_Layer: 6
   m_Name: Slider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -351,7 +351,7 @@ GameObject:
   - component: {fileID: 3618919275041678695}
   - component: {fileID: 4535596251432158293}
   - component: {fileID: 7396962691947990158}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -575,7 +575,7 @@ GameObject:
   - component: {fileID: 2351927662410273227}
   - component: {fileID: 2509279256822294717}
   - component: {fileID: 4968887005491869307}
-  m_Layer: 5
+  m_Layer: 6
   m_Name: Fill
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -649,7 +649,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1308545749423780100}
   - component: {fileID: 8994073479386497277}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: hpbar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -696,7 +696,7 @@ GameObject:
   m_Component:
   - component: {fileID: 934591756580895023}
   - component: {fileID: 5685977033235954768}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Health
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -744,8 +744,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8747445117819562294}
   - component: {fileID: 2446427413583094488}
-  - component: {fileID: 830660742975325268}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Movement
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -782,18 +781,3 @@ MonoBehaviour:
   dimension: 0
   rb: {fileID: 6386467518138000709}
   defaultMovementSpeed: 10
---- !u!114 &830660742975325268
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6956746148776154717}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec1f8ce59dd3e9a119502f784806d9df, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LookingDirection
-  movementComponent: {fileID: 2446427413583094488}
-  gizmoLineLength: 5
-  gizmoColor: {r: 1, g: 0, b: 0, a: 1}

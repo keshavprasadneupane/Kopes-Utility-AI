@@ -3,6 +3,7 @@
 
 
 using System.Collections.Generic;
+using Kope.Component;
 using Kope.Core.EntityComponentSystem;
 
 
@@ -17,6 +18,8 @@ using Kope.Core.EntityComponentSystem;
 /// If some one breaks this rule, then it is their responsibility. since they opted into this contract.
 /// </summary>
 public interface IReadOnlyContext {
+
+	FieldOfViewData FieldOfViewData { get; }
 	/// <summary>
 	/// Gives "Read-Only" access to the current entity's context.
 	/// Since the is a reference type, the underlying data can still be mutated via this reference.

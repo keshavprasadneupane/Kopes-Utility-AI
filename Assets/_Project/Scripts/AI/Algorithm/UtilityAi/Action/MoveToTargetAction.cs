@@ -3,6 +3,7 @@
 
 using System;
 using Kope.AI.Utility;
+using Kope.Component;
 using Kope.Component.Movement;
 using ThirdParty;
 using UnityEngine;
@@ -45,12 +46,15 @@ public class MoveTowardAction : ActionSO {
 
 	private CountdownTimer _actionTimer;
 
-	protected override void OnInitialize(Context ctx) {
+	protected override void OnValidate() {
+		base.OnValidate();
 		this._directionChangeTime = 1f / this.directionChangeFrequency;
 		this._directionChangeInterval = this._directionChangeTime;
 		this._squareFreeSpaceRadius = this.deadZone * this.deadZone;
-		var readOnlyTargetComponentRegistry = GetSelectedTargetRegistry(this.actionType);
+	}
 
+	protected override void OnInitialize(Context ctx) {
+		var readOnlyTargetComponentRegistry = GetSelectedTargetRegistry(this.actionType);
 		// just defensive checking, in case the considerations that provide the target registry 
 		// are not properly set up or fail to find a valid target, we want to avoid starting an action 
 		// that will try to act on a null target and cause errors.
@@ -80,10 +84,14 @@ public class MoveTowardAction : ActionSO {
 	public override void TickUpdate() {
 		this._actionTimer?.Tick(Time.deltaTime);
 	}
-
 	public override void TickFixedUpdate() {
 		// Decouples direction logic from physics updates using a lightweight float timer.
 		this._directionChangeInterval -= Time.fixedDeltaTime;
+
+		// Hysteresis: the entity continues chasing slightly beyond the detection range before disengaging.
+		// This prevents flickering when the target hovers near the range boundary,
+		// and produces more natural, committed movement rather than snapping on/off.
+		// #FeatureNotABug  as Todd Howard would say.
 
 		if (this._readOnlyTargetTransform == null || this._selfMovementComponent == null) {
 			SetComplete();
